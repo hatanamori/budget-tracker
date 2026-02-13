@@ -1,0 +1,19 @@
+.env
+.env.*
+*.pem
+*.key
+
+# --- Backend (Python) ---
+backend/__pycache__/
+backend/*.pyc
+backend/venv/
+backend/.venv/
+backend/.pytest_cache/
+
+# --- Frontend (Next.js) ---
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.vercel/
+frontend/*.tsbuildinfo
