@@ -1,6 +1,18 @@
 version: "3.8"
 
 services:
+  db:
+    image: postgres:14-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: budget_db
+    restart: always
+
   backend:
     build: ./backend
     ports:
@@ -8,9 +20,10 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      - WATCHFILES_FORCE_POLLING=true
+      WATCHFILES_FORCE_POLLING: true
+      DATABASE_URL: postgresql://user:password@db:5432/budget_db
   
-  fronend:
+  frontend:
     build: ./frontend
     ports:
       - "3000:3000"
@@ -21,4 +34,5 @@ services:
       NEXT_PUBLIC_API_URL: http://localhost:8000 
       WATCHPACK_POLLING: "true"
 
-  
+volumes:
+  postgres_data:

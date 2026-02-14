@@ -3,6 +3,9 @@
 *.pem
 *.key
 
+# --- DB (PostgreSQL) ---
+postgres_data/
+
 # --- Backend (Python) ---
 backend/__pycache__/
 backend/*.pyc
