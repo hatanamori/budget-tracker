@@ -7,8 +7,8 @@ Base = declarative_base()
 class Account(Base):
     __tablename__ = "accounts"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
-    type = Column(String)
+    name = Column(String(255), nullable=False)
+    type = Column(String(255), nullable=False)
     closing_day = Column(Integer, nullable=True)
     payment_day = Column(Integer, nullable=True)
 
@@ -19,8 +19,8 @@ class Category(Base):
     __tablename__ = "categories"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
-    type = Column(String)
+    name = Column(String(255), nullable=False)
+    type = Column(String(255), nullable=False)
 
     sub_categories = relationship("SubCategory", back_populates="category")
 
@@ -29,7 +29,7 @@ class SubCategory(Base):
     __tablename__ = "sub_categories"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
+    name = Column(String(255), index=True, nullable=False)
     category_id = Column(Integer, ForeignKey("categories.id"))
 
     category = relationship("Category", back_populates="sub_categories")
@@ -40,7 +40,7 @@ class Goal(Base):
     __tablename__ = "goals"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
+    name = Column(String(255), nullable=False)
     target_amount = Column(Integer, nullable=False)
     deadline = Column(Date, nullable=True)
     url = Column(String, nullable=True)
@@ -56,13 +56,14 @@ class Transaction(Base):
     __tablename__ = "transactions"
 
     id = Column(Integer, primary_key=True, index=True)
-    date = Column(Date)
+    date = Column(Date, nullable=False)
     amount = Column(Integer, nullable=False)
     memo = Column(String)
 
     # 外部キー設定
-    account_id = Column(Integer, ForeignKey("accounts.id"))
-    sub_category_id = Column(Integer, ForeignKey("sub_categories.id"))
+    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
+    sub_category_id = Column(Integer, ForeignKey(
+        "sub_categories.id"), nullable=False)
     goal_id = Column(Integer, ForeignKey("goals.id"), nullable=True)
 
     # リレーション設定

@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List
@@ -54,7 +54,7 @@ def create_category(account: schemas.CategoryCreate, db: Session = Depends(get_d
 
 
 @app.get("/categories/", response_model=List[schemas.Category])
-def read_category(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def read_category(skip: int = 0, limit: int = Query(100, le=1000), db: Session = Depends(get_db)):
     return db.query(models.Category).offset(skip).limit(limit).all()
 
 # ---------------------------------------------
@@ -62,8 +62,8 @@ def read_category(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 
 
 @app.post("/sub-categories/", response_model=schemas.SubCategory)
-def create_sub_category(account: schemas.SubCategoryCreate, db: Session = Depends(get_db)):
-    db_sub = models.SubCategory(**account.model_dump())
+def create_sub_category(sub_category: schemas.SubCategoryCreate, db: Session = Depends(get_db)):
+    db_sub = models.SubCategory(**sub_category.model_dump())
 
     db.add(db_sub)
     db.commit()
@@ -72,7 +72,7 @@ def create_sub_category(account: schemas.SubCategoryCreate, db: Session = Depend
 
 
 @app.get("/sub-categories/", response_model=List[schemas.SubCategory])
-def read_sub_category(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def read_sub_category(skip: int = 0, limit: int = Query(100, le=1000), db: Session = Depends(get_db)):
     return db.query(models.SubCategory).offset(skip).limit(limit).all()
 
 # ---------------------------------------------
@@ -89,7 +89,7 @@ def create_goal(goal: schemas.GoalCreate, db: Session = Depends(get_db)):
 
 
 @app.get("/goals/", response_model=List[schemas.Goal])
-def read_goals(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def read_goals(skip: int = 0, limit: int = Query(100, le=1000), db: Session = Depends(get_db)):
     return db.query(models.Goal).offset(skip).limit(limit).all()
 
 # ---------------------------------------------
@@ -108,7 +108,7 @@ def create_transaction(transaction: schemas.TransactionCreate, db: Session = Dep
 
 
 @app.get("/transactions/", response_model=List[schemas.Transaction])
-def read_transactions(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def read_transactions(skip: int = 0, limit: int = Query(100, le=1000), db: Session = Depends(get_db)):
     return db.query(models.Transaction).offset(skip).limit(limit).all()
 
 # ---------------------------------------------
