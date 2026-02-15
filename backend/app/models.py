@@ -25,7 +25,7 @@ class Category(Base):
     sub_categories = relationship("SubCategory", back_populates="category")
 
 
-class Sub_category(Base):
+class SubCategory(Base):
     __tablename__ = "sub_categories"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -52,11 +52,11 @@ class Goal(Base):
 # --------------------
 
 
-class Transactions(Base):
+class Transaction(Base):
     __tablename__ = "transactions"
 
     id = Column(Integer, primary_key=True, index=True)
-    transaction_date = Column(Date)
+    date = Column(Date)
     amount = Column(Integer, nullable=False)
     memo = Column(String)
 
