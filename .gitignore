@@ -7,8 +7,10 @@
 postgres_data/
 
 # --- Backend (Python) ---
-backend/__pycache__/
-backend/*.pyc
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
 backend/venv/
 backend/.venv/
 backend/.pytest_cache/
