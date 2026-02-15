@@ -57,6 +57,23 @@ class SubCategory(SubCategoryBase):
     id: int
     # category: Category # 親カテゴリの情報を含めたい場合はコメントアウトを外す
 
+# ----- Goal のスキーマ -----
+
+
+class GoalBase(BaseSchema):
+    name: str
+    target_amount: int
+    deadline: Optional[date] = None
+    url: Optional[str] = None
+
+
+class GoalCreate(GoalBase):
+    pass
+
+
+class Goal(GoalBase):
+    id: int
+
 # ----- Transaction のスキーマ -----
 
 
