@@ -1,8 +1,8 @@
-"""Initial tables
+"""Fix transaction date column
 
-Revision ID: 86c9bbf29d5c
+Revision ID: 3f4679ffdbbc
 Revises: 
-Create Date: 2026-02-15 01:18:58.280002
+Create Date: 2026-02-15 04:48:06.534050
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '86c9bbf29d5c'
+revision: str = '3f4679ffdbbc'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -57,7 +57,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_sub_categories_name'), 'sub_categories', ['name'], unique=False)
     op.create_table('transactions',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('transaction_date', sa.Date(), nullable=True),
+    sa.Column('date', sa.Date(), nullable=True),
     sa.Column('amount', sa.Integer(), nullable=False),
     sa.Column('memo', sa.String(), nullable=True),
     sa.Column('account_id', sa.Integer(), nullable=True),
