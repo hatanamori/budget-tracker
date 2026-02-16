@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState} from "react";
+import toast, { Toaster } from 'react-hot-toast';
 
 interface Account {
   id: number;
@@ -19,14 +20,17 @@ interface SubCategory {
 }
 
 // カテゴリ名に合わせてアイコンを返す
-const getCategoryIcon = (name: string) => {
-  if (name.includes("食")) return "🍔";
-  if (name.includes("交通")) return "🚃";
-  if (name.includes("住")) return "🏠";
-  if (name.includes("日用")) return "🧻";
-  if (name.includes("エンタメ") || name.includes("遊び")) return "🎮";
-  if (name.includes("給料")) return "💰";
-  return "📁"; // デフォルト
+const getCategoryIcon = (name: string) => {  
+  const iconMap: { [key: string]: string } = {  
+    "食": "🍔",  
+    "交通": "🚃",  
+    "住": "🏠",  
+    "日用": "🧻",  
+    "エンタメ": "🎮",  
+    "遊び": "🎮",  
+    "給料": "💰",  
+  }; 
+  return iconMap[name] || "🏷️";
 };
 
 export default function Home() {
@@ -40,30 +44,35 @@ export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
 
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";  
+
   // 画面表示時に選択肢リストを取得
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // 口座一覧を取得
-        const accRes = await fetch("http://localhost:8000/accounts/");
-        const accData = await accRes.json();
-        setAccounts(accData);
-        // 初期値の設定
-        if (accData.length > 0) setSelectedAccountId(accData[0].id.toString());
+    const fetchData = async () => {  
+      try {  
+        const [accRes, catRes, subRes] = await Promise.all([  
+          fetch(`${API_BASE_URL}/accounts/`),  
+          fetch(`${API_BASE_URL}/categories/`),  
+          fetch(`${API_BASE_URL}/sub-categories/`),  
+        ]);  
 
-        // カテゴリ一覧を取得
-        const catRes = await fetch("http://localhost:8000/categories/");
-        const catData = await catRes.json();
-        setCategories(catData);
+        const [accData, catData, subData] = await Promise.all([  
+          accRes.json(),  
+          catRes.json(),  
+          subRes.json(),  
+        ]);  
 
-        // サブカテゴリ一覧を取得
-        const subRes = await fetch("http://localhost:8000/sub-categories/");
-        const subData = await subRes.json();
-        setSubCategories(subData);
-      } catch (error) {
-        console.error("データの取得に失敗しました", error);
-      }
-    };
+        setAccounts(accData);  
+        // 初期値の設定  
+        if (accData.length > 0) setSelectedAccountId(accData[0].id.toString());  
+
+        setCategories(catData);  
+
+        setSubCategories(subData);  
+      } catch (error) {  
+        console.error("データの取得に失敗しました", error);  
+      }  
+    };  
     fetchData();
   }, []);
 
@@ -71,25 +80,13 @@ export default function Home() {
     (sub) => sub.category_id === Number(selectedCategoryId)
   );
 
-  // カテゴリが変わったときの処理
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newCategoryId = e.target.value;
-    setSelectedCategoryId(newCategoryId);
-    
-    const newSubs = subCategories.filter(sub => sub.category_id === Number(newCategoryId));
-    if (newSubs.length > 0) {
-      setSelectedSubCategoryId(newSubs[0].id.toString());
-    } else {
-      setSelectedSubCategoryId("");
-    }
-  };
 
   // 送信ボタンが押された時の処理
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!selectedAccountId || !selectedSubCategoryId) {
-      alert("すべての項目を選択してください");
+      toast.error("すべての項目を選択してください");
       return;
     }
 
@@ -104,23 +101,29 @@ export default function Home() {
     };
 
     try {
-      const response = await fetch("http://localhost:8000/transactions/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(transactionData),
-      });
+      await toast.promise(
+        fetch(`${API_BASE_URL}/transactions/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(transactionData),
+        }).then(async (response) => {
+            if (!response.ok) throw new Error("Server Error");
+            return response;
+        }),
+        {
+          loading: '保存中...',
+          success: '保存しました！',
+          error: '保存に失敗しました。',
+        }
+      );
 
-      if (response.ok) {
-        alert("保存しました！");
-        setAmount(0);
-        setMemo("");
-        setSelectedCategoryId("");
-        setSelectedSubCategoryId("");
-      } else {
-        alert("保存に失敗しました。");
-      }
+      setAmount(0);
+      setMemo("");
+      setSelectedCategoryId("");
+      setSelectedSubCategoryId("");
+
     } catch (error) {
       console.error("エラー:", error);
       alert("サーバーとの通信に失敗しました");
@@ -129,6 +132,8 @@ export default function Home() {
 
   return (
     <main className="p-10">
+      <Toaster position="top-center" reverseOrder={false} />
+      
       <h1 className="text-3xl font-bold mb-6">💰 家計簿アプリ</h1>
 
       <form onSubmit={handleSubmit} className="bg-gray-50 p-6 rounded-lg shadow-md max-w-md">
@@ -146,8 +151,6 @@ export default function Home() {
             />
           </div>
         </div>
-
-
 
         {/* 親カテゴリ */}
         <div>
