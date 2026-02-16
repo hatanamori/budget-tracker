@@ -32,7 +32,7 @@ export default function RootLayout({
         <Navigation />
         <Toaster position="top-center" />
 
-        <main className="md:ml-64 pd-20 min-h-screen">
+        <main className="md:ml-64 pb-20 min-h-screen">
           <div className="container mx-auto p-4 max-w-4xl">
             {children}
           </div>
