@@ -7,6 +7,14 @@ from . import models, schemas, database
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 3000番からのアクセスを許可
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # ---------------------------------------------
 # DBセッションを取得するための依存関係
 # ---------------------------------------------
@@ -120,13 +128,6 @@ def read_root():
 
 
 # ---------------------------------------------
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # 3000番からのアクセスを許可
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 
 if __name__ == "__main__":
