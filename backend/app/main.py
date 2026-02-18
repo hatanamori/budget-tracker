@@ -57,7 +57,7 @@ def delete_account(account_id: int, db: Session = Depends(get_db)):
 
     db.delete(db_obj)
     db.commit()
-    return {"massage": "Account deleted successfully"}
+    return {"message": "Account deleted successfully"}
 
 # ---------------------------------------------
 # カテゴリ
@@ -87,7 +87,7 @@ def delete_category(category_id: int, db: Session = Depends(get_db)):
 
     db.delete(db_obj)
     db.commit()
-    return {"massage": "Category deleted successfully"}
+    return {"message": "Category deleted successfully"}
 
 # ---------------------------------------------
 # サブカテゴリ
