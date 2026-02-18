@@ -8,7 +8,6 @@ class Account(Base):
     __tablename__ = "accounts"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
-    type = Column(String(255), nullable=False)
     closing_day = Column(Integer, nullable=True)
     payment_day = Column(Integer, nullable=True)
 
@@ -22,7 +21,11 @@ class Category(Base):
     name = Column(String(255), nullable=False)
     type = Column(String(255), nullable=False)
 
-    sub_categories = relationship("SubCategory", back_populates="category")
+    sub_categories = relationship(
+        "SubCategory",
+        back_populates="category",
+        cascade="all, delete-orphan"
+    )
 
 
 class SubCategory(Base):
