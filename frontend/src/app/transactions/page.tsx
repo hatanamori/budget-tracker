@@ -8,8 +8,8 @@ interface Transaction {
   date: string;
   amount: number;
   memo: string;
-  account_id: number;
-  sub_category_id: number;
+  accountId: number;
+  subCategoryId: number;
 }
 
 interface Account {
@@ -28,13 +28,7 @@ interface SubCategory {
   category_id: number;
 }
 
-export default function transactionView() {
-  const [amount, setAmount] = useState<number>(0);
-  const [memo, setMemo] = useState<string>("");
-  const [selectedAccountId, setSelectedAccountId] = useState<string>("");
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
-  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<string>("");
-
+export default function Page() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -66,6 +60,7 @@ export default function transactionView() {
 
       } catch (error) {
         console.error("データの取得に失敗しました", error);
+        toast.error("データの取得に失敗しました。"); 
       }
     };
   fetchData();
@@ -112,9 +107,9 @@ export default function transactionView() {
               <tr key={t.id} className="hover:bg-yellow-50">
                 <td className="px-4 py-2 border-r border-yellow-900">{t.date}</td>
 
-                <td className="px-4 py-2 border-r border-yellow-900">{getCategoryName(t.sub_category_id)}</td>
-                <td className="px-4 py-2 border-r border-yellow-900">{getSubCategoryName(t.sub_category_id)}</td>
-                <td className="px-4 py-2 border-r border-yellow-900">{getAccountName(t.account_id)}</td>
+                <td className="px-4 py-2 border-r border-yellow-900">{getCategoryName(t.subCategoryId)}</td>
+                <td className="px-4 py-2 border-r border-yellow-900">{getSubCategoryName(t.subCategoryId)}</td>
+                <td className="px-4 py-2 border-r border-yellow-900">{getAccountName(t.accountId)}</td>
 
                 <td className="px-4 py-2 border-r border-yellow-900 text-right">¥{t.amount.toLocaleString()}</td>
                 <td className="px-4 py-2 text-gray-600">{t.memo}</td>
