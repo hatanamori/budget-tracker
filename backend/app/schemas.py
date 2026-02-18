@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
-from typing import Optional
+from typing import List, Optional
 
 # ----- 共通する項目の設定 -----
 
@@ -14,7 +14,6 @@ class BaseSchema(BaseModel):
 
 class AccountBase(BaseSchema):
     name: str
-    type: str
     closing_day: Optional[int] = None
     payment_day: Optional[int] = None
 
@@ -24,21 +23,6 @@ class AccountCreate(AccountBase):
 
 
 class Account(AccountBase):
-    id: int
-
-# ----- Category のスキーマ -----
-
-
-class CategoryBase(BaseSchema):
-    name: str
-    type: str
-
-
-class CategoryCreate(CategoryBase):
-    pass
-
-
-class Category(CategoryBase):
     id: int
 
 # ----- SubCategory のスキーマ -----
@@ -55,7 +39,28 @@ class SubCategoryCreate(SubCategoryBase):
 
 class SubCategory(SubCategoryBase):
     id: int
-    # category: Category # 親カテゴリの情報を含めたい場合はコメントアウトを外す
+    category_id: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+
+# ----- Category のスキーマ -----
+
+
+class CategoryBase(BaseSchema):
+    name: str
+    type: str  # 収入 or 支出
+
+
+class CategoryCreate(CategoryBase):
+    pass
+
+
+class Category(CategoryBase):
+    id: int
+    sub_categories: List[SubCategory] = []
+
 
 # ----- Goal のスキーマ -----
 

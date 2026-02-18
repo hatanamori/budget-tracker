@@ -21,7 +21,11 @@ class Category(Base):
     name = Column(String(255), nullable=False)
     type = Column(String(255), nullable=False)
 
-    sub_categories = relationship("SubCategory", back_populates="category")
+    sub_categories = relationship(
+        "SubCategory",
+        back_populates="category",
+        cascade="all, delete-orphan"
+    )
 
 
 class SubCategory(Base):
