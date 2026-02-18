@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, Depends, Query
+from fastapi import FastAPI, Depends, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List
@@ -47,13 +47,25 @@ def create_account(account: schemas.AccountCreate, db: Session = Depends(get_db)
 def read_accounts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return db.query(models.Account).offset(skip).limit(limit).all()
 
+
+@app.delete("/accounts/{account_id}")
+def delete_account(account_id: int, db: Session = Depends(get_db)):
+    db_obj = db.query(models.Account).filter(
+        models.Account.id == account_id).first()
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+    db.delete(db_obj)
+    db.commit()
+    return {"massage": "Account deleted successfully"}
+
 # ---------------------------------------------
 # カテゴリ
 
 
 @app.post("/categories/", response_model=schemas.Category)
-def create_category(account: schemas.CategoryCreate, db: Session = Depends(get_db)):
-    db_category = models.Category(**account.model_dump())
+def create_category(category: schemas.CategoryCreate, db: Session = Depends(get_db)):
+    db_category = models.Category(**category.model_dump())
 
     db.add(db_category)
     db.commit()
@@ -64,6 +76,18 @@ def create_category(account: schemas.CategoryCreate, db: Session = Depends(get_d
 @app.get("/categories/", response_model=List[schemas.Category])
 def read_category(skip: int = 0, limit: int = Query(100, le=1000), db: Session = Depends(get_db)):
     return db.query(models.Category).offset(skip).limit(limit).all()
+
+
+@app.delete("/categories/{category_id}")
+def delete_category(category_id: int, db: Session = Depends(get_db)):
+    db_obj = db.query(models.Category).filter(
+        models.Category.id == category_id).first()
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Category not found")
+
+    db.delete(db_obj)
+    db.commit()
+    return {"massage": "Category deleted successfully"}
 
 # ---------------------------------------------
 # サブカテゴリ
@@ -83,6 +107,18 @@ def create_sub_category(sub_category: schemas.SubCategoryCreate, db: Session = D
 def read_sub_category(skip: int = 0, limit: int = Query(100, le=1000), db: Session = Depends(get_db)):
     return db.query(models.SubCategory).offset(skip).limit(limit).all()
 
+
+@app.delete("/sub-categories/{sub_category_id}")
+def delete_sub_category(sub_category_id: int, db: Session = Depends(get_db)):
+    db_obj = db.query(models.SubCategory).filter(
+        models.SubCategory.id == sub_category_id).first()
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="SubCategory not found")
+
+    db.delete(db_obj)
+    db.commit()
+    return {"message": "SubCategory deleted successfully"}
+
 # ---------------------------------------------
 # 目標
 
@@ -99,6 +135,17 @@ def create_goal(goal: schemas.GoalCreate, db: Session = Depends(get_db)):
 @app.get("/goals/", response_model=List[schemas.Goal])
 def read_goals(skip: int = 0, limit: int = Query(100, le=1000), db: Session = Depends(get_db)):
     return db.query(models.Goal).offset(skip).limit(limit).all()
+
+
+@app.delete("/goals/{goal_id}")
+def delete_goal(goal_id: int, db: Session = Depends(get_db)):
+    db_obj = db.query(models.Goal).filter(models.Goal.id == goal_id).first()
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Goal not found")
+
+    db.delete(db_obj)
+    db.commit()
+    return {"message": "Goal deleted successfully"}
 
 # ---------------------------------------------
 # 取引
@@ -119,6 +166,17 @@ def create_transaction(transaction: schemas.TransactionCreate, db: Session = Dep
 def read_transactions(skip: int = 0, limit: int = Query(100, le=1000), db: Session = Depends(get_db)):
     return db.query(models.Transaction).offset(skip).limit(limit).all()
 
+
+@app.delete("/transactions/{transaction_id}")
+def delete_transaction(transaction_id: int, db: Session = Depends(get_db)):
+    db_obj = db.query(models.Transaction).filter(
+        models.Transaction.id == transaction_id).first()
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+
+    db.delete(db_obj)
+    db.commit()
+    return {"message": "Transaction deleted successfully"}
 # ---------------------------------------------
 
 
