@@ -20,6 +20,7 @@ class Category(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
     type = Column(String(255), nullable=False)
+    icon_name = Column(String(255), nullable=True)
 
     sub_categories = relationship(
         "SubCategory",
@@ -34,6 +35,7 @@ class SubCategory(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), index=True, nullable=False)
     category_id = Column(Integer, ForeignKey("categories.id"))
+    icon_name = Column(String(255), nullable=True)
 
     category = relationship("Category", back_populates="sub_categories")
     transactions = relationship("Transaction", back_populates="sub_category")
@@ -45,6 +47,7 @@ class Goal(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
     target_amount = Column(Integer, nullable=False)
+    icon_name = Column(String(255), nullable=True)
     deadline = Column(Date, nullable=True)
     url = Column(String, nullable=True)
 
