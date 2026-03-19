@@ -10,7 +10,7 @@ import {
     Folder,
     Subtitles,
 } from "lucide-react";
-import { ICON_MAP } from "./icons";
+import { ICON_MAP } from "../../icons";
 
 interface SubCategory {
     id: number;
@@ -79,10 +79,7 @@ export default function CategoryManager() {
     };
 
     const DynamicIconDisplay = ({ iconName }: { iconName?: string }) => {
-        const DynamicIcon = iconName && ICON_MAP[iconName as keyof typeof ICON_MAP]
-            ? ICON_MAP[iconName as keyof typeof ICON_MAP]
-            : ICON_MAP["Folder"];
-
+        const DynamicIcon = (iconName && ICON_MAP[iconName as keyof typeof ICON_MAP]) || ICON_MAP["Folder"];
         return <DynamicIcon size={20} strokeWidth={2.5} className="text-gray-500" />
     }
 

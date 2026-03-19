@@ -71,10 +71,7 @@ export default function Home() {
     }, []);
 
     const DynamicIconDisplay = ({ iconName }: { iconName?: string }) => {
-        const DynamicIcon = iconName && ICON_MAP[iconName as keyof typeof ICON_MAP]
-            ? ICON_MAP[iconName as keyof typeof ICON_MAP]
-            : ICON_MAP["Folder"];
-
+        const DynamicIcon = (iconName && ICON_MAP[iconName as keyof typeof ICON_MAP]) || ICON_MAP["Folder"];
         return <DynamicIcon size={20} strokeWidth={2.5} className="text-gray-500" />
     }
 
