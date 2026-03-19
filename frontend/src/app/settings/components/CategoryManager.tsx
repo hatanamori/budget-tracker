@@ -2,351 +2,356 @@
 
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import {
+    Plus,
+    Trash2,
+    ChevronDown,
+    ChevronRight,
+    Folder,
+    Subtitles,
+} from "lucide-react";
+import { ICON_MAP } from "../../icons";
 
-// 型定義に type を追加
 interface SubCategory {
-  id: number;
-  name: string;
-  category_id: number;
+    id: number;
+    name: string;
+    category_id: number;
+    icon_name?: string;
 }
 
 interface Category {
-  id: number;
-  name: string;
-  type: string; // "支出" or "収入"
-  sub_categories: SubCategory[];
+    id: number;
+    name: string;
+    type: string;
+    sub_categories: SubCategory[];
+    icon_name?: string;
 }
 
 export default function CategoryManager() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+    const [expandedIds, setExpandedIds] = useState<number[]>([]);
+    const [newCategoryName, setNewCategoryName] = useState("");
+    const [newCategoryIcon, setNewCategoryIcon] = useState("Folder");
+    const [newCategoryType, setNewCategoryType] = useState("支出");
+    const [iconModalType, setIconModalType] = useState<"parent" | "sub" | null>(null);
+    const [activeAddSubId, setActiveAddSubId] = useState<number | null>(null);
+    const [newSubCategoryName, setNewSubCategoryName] = useState("");
+    const [newSubCategoryIcon, setNewSubCategoryIcon] = useState("Folder");
 
-  // 入力フォームの状態
-  const [newCategoryName, setNewCategoryName] = useState("");
-  // デフォルトは 支出
-  const [newCategoryType, setNewCategoryType] = useState("支出"); 
-  
-  const [newSubCategoryName, setNewSubCategoryName] = useState("");
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    // データ取得
+    const fetchData = async () => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/categories/`);
+            if (!res.ok) throw new Error("Fetch failed");
 
-  // データ取得
-  const fetchData = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/categories/`);
-      if (!res.ok) throw new Error("Fetch failed");
+            const data: Category[] = await res.json();
 
-      const data: Category[] = await res.json();
+            // ▼ 並び替えロジック: 支出が先、収入が後
+            const sortedData = data.sort((a, b) => {
+                if (a.type === "支出" && b.type === "収入") return -1;
+                if (a.type === "収入" && b.type === "支出") return 1;
+                return 0;
+            });
 
-      // ▼ 並び替えロジック: 支出が先、収入が後
-      const sortedData = data.sort((a, b) => {
-        if (a.type === "支出" && b.type === "収入") return -1;
-        if (a.type === "収入" && b.type === "支出") return 1;
-        return 0;
-      });
+            setCategories(sortedData);
 
-      setCategories(sortedData);
+            if (selectedCategory) {
+                const updatedSelected = sortedData.find((c) => c.id === selectedCategory.id);
+                setSelectedCategory(updatedSelected || null);
+            }
+        } catch (error) {
+            console.error("データの取得に失敗しました", error);
+            toast.error("データの取得に失敗しました。");
+        }
+    };
 
-      if (selectedCategory) {
-        const updatedSelected = sortedData.find((c) => c.id === selectedCategory.id);
-        setSelectedCategory(updatedSelected || null);
-      }
-    } catch (error) {
-      console.error("データの取得に失敗しました", error);
-      toast.error("データの取得に失敗しました。");
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const toggleExpand = (id: number) => {
+        setExpandedIds(prev =>
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+    };
+
+    const DynamicIconDisplay = ({ iconName }: { iconName?: string }) => {
+        const DynamicIcon = (iconName && ICON_MAP[iconName as keyof typeof ICON_MAP]) || ICON_MAP["Folder"];
+        return <DynamicIcon size={20} strokeWidth={2.5} className="text-gray-500" />
     }
-  };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+    // --- 親カテゴリ追加 ---
+    const handleAddCategory = async () => {
+        if (!newCategoryName) return;
 
-  // --- 親カテゴリ追加 ---
-  const handleAddCategory = async () => {
-    if (!newCategoryName) return;
+        const promise = fetch(`${API_BASE_URL}/categories/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                name: newCategoryName,
+                type: newCategoryType,
+                icon_name: newCategoryIcon
+            }),
+        }).then(async (response) => {
+            if (!response.ok) throw new Error("Server Error");
+            return response;
+        });
 
-    const promise = fetch(`${API_BASE_URL}/categories/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        name: newCategoryName,
-        type: newCategoryType 
-      }),
-    }).then(async (response) => {
-      if (!response.ok) throw new Error("Server Error");
-      return response;
-    });
+        await toast.promise(promise, {
+            loading: "保存中...",
+            success: "カテゴリを追加しました！",
+            error: "保存に失敗しました。",
+        });
 
-    await toast.promise(promise, {
-      loading: "保存中...",
-      success: "カテゴリを追加しました！",
-      error: "保存に失敗しました。",
-    });
+        setNewCategoryName("");
+        fetchData();
+    };
 
-    setNewCategoryName("");
-    fetchData();
-  };
+    // --- 親カテゴリ削除 ---
+    const handleDeleteCategory = async (id: number) => {
+        if (!confirm("カテゴリを削除しますか？紐づくサブカテゴリも削除されます。")) return;
 
-  // --- 親カテゴリ削除 ---
-  const handleDeleteCategory = async (id: number) => {
-    if (!confirm("カテゴリを削除しますか？紐づくサブカテゴリも削除されます。")) return;
+        const promise = fetch(`${API_BASE_URL}/categories/${id}`, {
+            method: "DELETE",
+        }).then(async (response) => {
+            if (!response.ok) throw new Error("Server Error");
+            return response;
+        });
 
-    const promise = fetch(`${API_BASE_URL}/categories/${id}`, {
-      method: "DELETE",
-    }).then(async (response) => {
-      if (!response.ok) throw new Error("Server Error");
-      return response;
-    });
+        await toast.promise(promise, {
+            loading: "削除中...",
+            success: "削除しました",
+            error: "削除に失敗しました。",
+        });
 
-    await toast.promise(promise, {
-      loading: "削除中...",
-      success: "削除しました",
-      error: "削除に失敗しました。",
-    });
+        if (selectedCategory?.id === id) {
+            setSelectedCategory(null);
+        }
+        fetchData();
+    };
 
-    if (selectedCategory?.id === id) {
-      setSelectedCategory(null);
-    }
-    fetchData();
-  };
+    // --- サブカテゴリ追加 ---
+    const handleAddSubCategory = async (parentId: number) => {
+        if (!newSubCategoryName) return;
 
-  // --- サブカテゴリ追加 ---
-  const handleAddSubCategory = async () => {
-    if (!selectedCategory || !newSubCategoryName) return;
+        const promise = fetch(`${API_BASE_URL}/sub-categories/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                name: newSubCategoryName,
+                category_id: parentId,
+                icon_name: newSubCategoryIcon
+            }),
+        }).then(async (response) => {
+            if (!response.ok) throw new Error("Server Error");
+            return response;
+        });
 
-    const promise = fetch(`${API_BASE_URL}/sub-categories/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: newSubCategoryName,
-        category_id: selectedCategory.id,
-      }),
-    }).then(async (response) => {
-      if (!response.ok) throw new Error("Server Error");
-      return response;
-    });
+        await toast.promise(promise, {
+            loading: "保存中...",
+            success: "サブカテゴリを追加しました！",
+            error: "保存に失敗しました。",
+        });
 
-    await toast.promise(promise, {
-      loading: "保存中...",
-      success: "サブカテゴリを追加しました！",
-      error: "保存に失敗しました。",
-    });
+        setNewSubCategoryName("");
+        setActiveAddSubId(null);
+        fetchData();
+    };
 
-    setNewSubCategoryName("");
-    fetchData();
-  };
+    // --- サブカテゴリ削除 ---
+    const handleDeleteSubCategory = async (id: number) => {
+        if (!confirm("サブカテゴリを削除しますか？")) return;
 
-  // --- サブカテゴリ削除 ---
-  const handleDeleteSubCategory = async (id: number) => {
-    if (!confirm("サブカテゴリを削除しますか？")) return;
+        const promise = fetch(`${API_BASE_URL}/sub-categories/${id}`, {
+            method: "DELETE",
+        }).then(async (response) => {
+            if (!response.ok) throw new Error("Server Error");
+            return response;
+        });
 
-    const promise = fetch(`${API_BASE_URL}/sub-categories/${id}`, {
-      method: "DELETE",
-    }).then(async (response) => {
-      if (!response.ok) throw new Error("Server Error");
-      return response;
-    });
+        await toast.promise(promise, {
+            loading: "削除中...",
+            success: "削除しました",
+            error: "削除に失敗しました。",
+        });
 
-    await toast.promise(promise, {
-      loading: "削除中...",
-      success: "削除しました",
-      error: "削除に失敗しました。",
-    });
+        fetchData();
+    };
 
-    fetchData();
-  };
+    const renderCategorySection = (title: string, type: string) => {
+        const filteredCategories = categories.filter(c => c.type === type);
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-      {/* ================= 左側：親カテゴリ ================= */}
-      <div className="space-y-6">
-        <h2 className="text-xl font-bold text-gray-700">カテゴリ (親)</h2>
+        return (
+            <div className="mb-8" key={type}>
+                <h3 className={`text-sm font-bold mb-3 px-2 ${type === '支出' ? 'text-red-500' : 'text-blue-500'}`}>
+                    {title}
+                </h3>
+                <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
+                    {filteredCategories.map((cat, index) => (
+                        <div key={cat.id} className={`${index !== filteredCategories.length - 1 ? 'border-b border-gray-50' : ''}`}>
+                            {/* 親カテゴリ行 */}
+                            <div
+                                className="flex items-center justify-between p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                                onClick={() => toggleExpand(cat.id)}
+                            >
+                                <div className="flex items-center gap-3">
+                                    {expandedIds.includes(cat.id) ? <ChevronDown size={18} className="text-gray-400" /> : <ChevronRight size={18} className="text-gray-400" />}
+                                    <div className="p-2 bg-gray-100 rounded-lg text-gray-600">
+                                        <DynamicIconDisplay iconName={cat.icon_name} />
+                                    </div>
+                                    <span className="font-semibold text-gray-800">{cat.name}</span>
+                                    <span className="text-xs text-gray-400">({cat.sub_categories.length})</span>
+                                </div>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteCategory(cat.id);
+                                    }}
+                                    className="p-2 text-gray-300 hover:text-red-500 transition-colors"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
 
-        {/* 追加フォームエリア */}
-        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg space-y-3">
-          {/* ▼ ラジオボタンエリア */}
-          <div className="flex gap-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="categoryType"
-                value="支出"
-                checked={newCategoryType === "支出"}
-                onChange={(e) => setNewCategoryType(e.target.value)}
-                className="accent-red-500"
-              />
-              <span className="text-gray-700 font-medium">支出</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="categoryType"
-                value="収入"
-                checked={newCategoryType === "収入"}
-                onChange={(e) => setNewCategoryType(e.target.value)}
-                className="accent-blue-500"
-              />
-              <span className="text-gray-700 font-medium">収入</span>
-            </label>
-          </div>
+                            {/* 子サブカテゴリ展開エリア */}
+                            {expandedIds.includes(cat.id) && (
+                                <div className="bg-gray-50/50 px-4 pb-4 space-y-2">
+                                    {cat.sub_categories.map(sub => (
+                                        <div key={sub.id} className="flex items-center justify-between ml-10 p-2 bg-white border border-gray-100 rounded-lg shadow-sm">
+                                            <DynamicIconDisplay iconName={sub.icon_name} />
+                                            <span className="text-sm text-gray-600">{sub.name}</span>
+                                            <button
+                                                onClick={() => handleDeleteSubCategory(sub.id)}
+                                                className="p-1 text-gray-300 hover:text-red-500"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
 
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="新しいカテゴリ名"
-              className="border border-yellow-400 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-yellow-500"
-              value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
-            />
-            <button
-              onClick={handleAddCategory}
-              className="bg-yellow-600 text-white px-6 py-2 rounded hover:bg-yellow-700 font-bold whitespace-nowrap"
-            >
-              追加
-            </button>
-          </div>
-        </div>
+                                    {/* サブカテゴリ追加入力 */}
+                                    <div className="ml-10 flex gap-2 pt-2">
+                                        <input
+                                            type="text"
+                                            placeholder="子カテゴリを追加..."
+                                            className="flex-1 text-sm bg-transparent border-b border-gray-200 focus:border-yellow-500 outline-none px-1 py-1"
+                                            value={activeAddSubId === cat.id ? newSubCategoryName : ""}
+                                            onChange={(e) => {
+                                                setActiveAddSubId(cat.id);
+                                                setNewSubCategoryName(e.target.value);
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') handleAddSubCategory(cat.id);
+                                            }}
+                                        />
+                                        <button
+                                            onClick={() => setIconModalType("sub")}
+                                            className="p-2 bg-gray-50 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center border border-transparent focus:border-yellow-400 outline-none"
+                                        >
+                                            <DynamicIconDisplay iconName={newSubCategoryIcon} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleAddSubCategory(cat.id)}
+                                            className="p-1 text-yellow-600 hover:bg-yellow-50 rounded"
+                                        >
+                                            <Plus size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                    {filteredCategories.length === 0 && (
+                        <div className="p-4 text-center text-gray-400 text-sm">カテゴリがありません</div>
+                    )}
+                </div>
+            </div>
+        );
+    };
 
-        {/* 一覧表示エリア */}
-        <div className="overflow-x-auto shadow-md rounded-lg max-h-[600px] overflow-y-auto">
-          <table className="min-w-full border-collapse bg-white text-left text-sm">
-            <thead className="bg-yellow-600 text-white sticky top-0 z-10">
-              <tr>
-                <th className="px-6 py-3 font-bold">カテゴリ名</th>
-                <th className="px-6 py-3 font-bold text-right">操作</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-yellow-100">
-              {categories.map((cat) => (
-                <tr
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`cursor-pointer transition-colors ${
-                    selectedCategory?.id === cat.id
-                      ? "bg-yellow-100 border-l-4 border-yellow-600"
-                      : "hover:bg-yellow-50"
-                  }`}
+    return (
+        <div className="max-w-2xl mx-auto py-8 px-4">
+            <h2 className="text-2xl font-bold text-gray-800 mb-8">カテゴリ設定</h2>
+
+            {/* 新規カテゴリ作成クイックバー */}
+            <div className="flex gap-3 mb-10 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                <select
+                    className="bg-gray-50 border-none rounded-xl px-3 text-sm font-bold text-gray-600 outline-none"
+                    value={newCategoryType}
+                    onChange={(e) => setNewCategoryType(e.target.value)}
                 >
-                  <td className="px-6 py-4 font-medium text-gray-800">
-                    <div className="flex items-center gap-2">
-                      {/* タイプのバッジ表示 */}
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded border ${
-                          cat.type === "収入"
-                            ? "bg-blue-100 text-blue-700 border-blue-200"
-                            : "bg-red-100 text-red-700 border-red-200"
-                        }`}
-                      >
-                        {cat.type}
-                      </span>
-                      <span>{cat.name}</span>
-                      {selectedCategory?.id === cat.id && (
-                        <span className="ml-2 text-xs text-yellow-700 font-bold">
-                          選択中
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteCategory(cat.id);
-                      }}
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1 rounded border border-red-200"
+                    <option value="支出">支出</option>
+                    <option value="収入">収入</option>
+                </select>
+                <input
+                    type="text"
+                    placeholder="新しい親カテゴリ名..."
+                    className="flex-1 bg-gray-50 border-none rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-yellow-400"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                />
+                {/* アイコン選択ボタン */}
+                <button
+                    onClick={() => setIconModalType("parent")}
+                    className="p-2 bg-gray-50 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center border border-transparent focus:border-yellow-400 outline-none"
+                >
+                    <DynamicIconDisplay iconName={newCategoryIcon} />
+                </button>
+                <button
+                    onClick={handleAddCategory}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-xl transition-all shadow-lg shadow-yellow-200"
+                >
+                    <Plus size={24} />
+                </button>
+            </div>
+
+            {renderCategorySection("支出カテゴリ", "支出")}
+            {renderCategorySection("収入カテゴリ", "収入")}
+
+            {iconModalType && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+                    onClick={() => setIconModalType(null)}
+                >
+                    <div
+                        className="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full"
+                        onClick={(e) => e.stopPropagation()}
                     >
-                      削除
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {categories.length === 0 && (
-                <tr>
-                  <td colSpan={2} className="px-6 py-4 text-center text-gray-500">
-                    データがありません
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                        <h3 className="text-lg font-bold text-gray-800 mb-4">アイコンを選択</h3>
+                        <div className="grid grid-cols-5 gap-3">
+                            {Object.keys(ICON_MAP).map((iconKey) => {
+                                const IconCmp = ICON_MAP[iconKey as keyof typeof ICON_MAP];
+
+                                const isSelected = iconModalType === "parent"
+                                    ? newCategoryIcon === iconKey
+                                    : newSubCategoryIcon === iconKey;
+                                return (
+                                    <button
+                                        key={iconKey}
+                                        onClick={() => {
+                                            if (iconModalType === "parent") {
+                                                setNewCategoryIcon(iconKey);
+                                            } else {
+                                                setNewSubCategoryIcon(iconKey);
+                                            }
+                                            setIconModalType(null);
+                                        }}
+                                        className={`p-3 rounded-xl flex items-center justify-center transition-colors ${isSelected
+                                            ? 'bg-yellow-100 border-2 border-yellow-400'
+                                            : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                                            }`}
+                                    >
+                                        <IconCmp size={24} className={isSelected ? 'text-yellow-600' : 'text-gray-600'} />
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-      </div>
-
-      {/* ================= 右側：サブカテゴリ ================= */}
-      <div className="space-y-6">
-        <h2 className="text-xl font-bold text-gray-700">
-          サブカテゴリ (子)
-          {selectedCategory && (
-            <span className="text-base font-normal ml-2 text-gray-500">
-              - {selectedCategory.name}
-            </span>
-          )}
-        </h2>
-
-        {!selectedCategory ? (
-          <div className="p-10 border-2 border-dashed border-gray-300 rounded-lg text-center text-gray-400">
-            左側のリストからカテゴリを選択してください
-          </div>
-        ) : (
-          <>
-            {/* 追加フォームエリア */}
-            <div className="flex gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <input
-                type="text"
-                placeholder="新しいサブカテゴリ名"
-                className="border border-blue-400 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={newSubCategoryName}
-                onChange={(e) => setNewSubCategoryName(e.target.value)}
-              />
-              <button
-                onClick={handleAddSubCategory}
-                className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-bold whitespace-nowrap"
-              >
-                追加
-              </button>
-            </div>
-
-            {/* 一覧表示エリア */}
-            <div className="overflow-x-auto shadow-md rounded-lg max-h-[600px] overflow-y-auto">
-              <table className="min-w-full border-collapse bg-white text-left text-sm">
-                <thead className="bg-blue-600 text-white sticky top-0 z-10">
-                  <tr>
-                    <th className="px-6 py-3 font-bold">サブカテゴリ名</th>
-                    <th className="px-6 py-3 font-bold text-right">操作</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-blue-100">
-                  {selectedCategory.sub_categories.map((sub) => (
-                    <tr key={sub.id} className="hover:bg-blue-50">
-                      <td className="px-6 py-4 font-medium text-gray-800">
-                        {sub.name}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => handleDeleteSubCategory(sub.id)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1 rounded border border-red-200"
-                        >
-                          削除
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {selectedCategory.sub_categories.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={2}
-                        className="px-6 py-4 text-center text-gray-500"
-                      >
-                        サブカテゴリが登録されていません
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
+    );
 }

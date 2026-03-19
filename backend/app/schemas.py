@@ -31,6 +31,7 @@ class Account(AccountBase):
 class SubCategoryBase(BaseSchema):
     name: str
     category_id: int
+    icon_name: Optional[str] = None
 
 
 class SubCategoryCreate(SubCategoryBase):
@@ -51,6 +52,7 @@ class SubCategory(SubCategoryBase):
 class CategoryBase(BaseSchema):
     name: str
     type: str  # 収入 or 支出
+    icon_name: Optional[str] = None
 
 
 class CategoryCreate(CategoryBase):
@@ -68,6 +70,7 @@ class Category(CategoryBase):
 class GoalBase(BaseSchema):
     name: str
     target_amount: int
+    icon_name: Optional[str] = None
     deadline: Optional[date] = None
     url: Optional[str] = None
 
