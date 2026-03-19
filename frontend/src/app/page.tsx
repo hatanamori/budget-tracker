@@ -170,38 +170,26 @@ export default function Home() {
         {/* 支出・収入選択*/}
         <div>
           <label className="block text-xs font-bold text-gray-400 mb-2 uppercase">transactionType</label>
-          <div className="flex gap-4">
-            <button
-              type="button"
-              onClick={() => {
-                setTransactionType("支出");
-                setSelectedCategoryId("");
-                setSelectedSubCategoryId("");
-              }}
-              className={`flex-1 py-2 rounded-lg font-bold transition-all ${
-                transactionType === "支出"
-                  ? "bg-yellow-500 text-white shadow-md"
-                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-              }`}
-            >
-              支出
-            </button> 
-            <button
-              type="button"
-              onClick={() => {
-                setTransactionType("収入");
-                setSelectedCategoryId("");
-                setSelectedSubCategoryId("");
-              }}
-              className={`flex-1 py-2 rounded-lg font-bold transition-all ${
-                transactionType === "収入"
-                  ? "bg-yellow-500 text-white shadow-md"
-                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-              }`}
-            >
-              収入
-            </button> 
-          </div>
+            <div className="flex gap-4">
+              {(['支出', '収入'] as const).map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => {
+                    setTransactionType(type);
+                    setSelectedCategoryId("");
+                    setSelectedSubCategoryId("");
+                  }}
+                  className={`flex-1 py-2 rounded-lg font-bold transition-all ${
+                    transactionType === type
+                      ? "bg-yellow-500 text-white shadow-md"
+                      : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
         </div>
 
         {/* 親カテゴリ */}
@@ -220,7 +208,6 @@ export default function Home() {
                   }}
                   className={`
                     flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors border
-                    px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border
                     ${isSelected 
                       ? "bg-yellow-600 text-white border-yellow-600 shadow-md scale-105" 
                       : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"}
@@ -308,7 +295,7 @@ export default function Home() {
           />
         </div>
 
-        <button type="submit" className="mt-4 bg-yellow-500 text-white p-2 rounded w-full hover:bg-blue-600 transition">
+        <button type="submit" className="mt-4 bg-yellow-500 text-white p-2 rounded w-full hover:bg-yellow-600 transition">
           保存
         </button>
       </form>
