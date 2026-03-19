@@ -9,8 +9,8 @@ import {
     ChevronRight,
     Folder,
     Subtitles,
-    MoreVertical
 } from "lucide-react";
+import { ICON_MAP } from "./icons";
 
 interface SubCategory {
     id: number;
@@ -32,9 +32,12 @@ export default function CategoryManager() {
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
     const [expandedIds, setExpandedIds] = useState<number[]>([]);
     const [newCategoryName, setNewCategoryName] = useState("");
+    const [newCategoryIcon, setNewCategoryIcon] = useState("Folder");
     const [newCategoryType, setNewCategoryType] = useState("支出");
+    const [iconModalType, setIconModalType] = useState<"parent" | "sub" | null>(null);
     const [activeAddSubId, setActiveAddSubId] = useState<number | null>(null);
     const [newSubCategoryName, setNewSubCategoryName] = useState("");
+    const [newSubCategoryIcon, setNewSubCategoryIcon] = useState("Folder");
 
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -75,6 +78,14 @@ export default function CategoryManager() {
         );
     };
 
+    const DynamicIconDisplay = ({ iconName }: { iconName?: string }) => {
+        const DynamicIcon = iconName && ICON_MAP[iconName as keyof typeof ICON_MAP]
+            ? ICON_MAP[iconName as keyof typeof ICON_MAP]
+            : ICON_MAP["Folder"];
+
+        return <DynamicIcon size={20} strokeWidth={2.5} className="text-gray-500" />
+    }
+
     // --- 親カテゴリ追加 ---
     const handleAddCategory = async () => {
         if (!newCategoryName) return;
@@ -85,7 +96,7 @@ export default function CategoryManager() {
             body: JSON.stringify({
                 name: newCategoryName,
                 type: newCategoryType,
-                icon_name: "Folder"
+                icon_name: newCategoryIcon
             }),
         }).then(async (response) => {
             if (!response.ok) throw new Error("Server Error");
@@ -135,7 +146,7 @@ export default function CategoryManager() {
             body: JSON.stringify({
                 name: newSubCategoryName,
                 category_id: parentId,
-                icon_name: "Folder"
+                icon_name: newSubCategoryIcon
             }),
         }).then(async (response) => {
             if (!response.ok) throw new Error("Server Error");
@@ -192,7 +203,7 @@ export default function CategoryManager() {
                                 <div className="flex items-center gap-3">
                                     {expandedIds.includes(cat.id) ? <ChevronDown size={18} className="text-gray-400" /> : <ChevronRight size={18} className="text-gray-400" />}
                                     <div className="p-2 bg-gray-100 rounded-lg text-gray-600">
-                                        <Folder size={20} strokeWidth={2.5} />
+                                        <DynamicIconDisplay iconName={cat.icon_name} />
                                     </div>
                                     <span className="font-semibold text-gray-800">{cat.name}</span>
                                     <span className="text-xs text-gray-400">({cat.sub_categories.length})</span>
@@ -213,6 +224,7 @@ export default function CategoryManager() {
                                 <div className="bg-gray-50/50 px-4 pb-4 space-y-2">
                                     {cat.sub_categories.map(sub => (
                                         <div key={sub.id} className="flex items-center justify-between ml-10 p-2 bg-white border border-gray-100 rounded-lg shadow-sm">
+                                            <DynamicIconDisplay iconName={sub.icon_name} />
                                             <span className="text-sm text-gray-600">{sub.name}</span>
                                             <button
                                                 onClick={() => handleDeleteSubCategory(sub.id)}
@@ -234,13 +246,18 @@ export default function CategoryManager() {
                                                 setActiveAddSubId(cat.id);
                                                 setNewSubCategoryName(e.target.value);
                                             }}
-                                            // Enterキーでの追加もサポート
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter') handleAddSubCategory(cat.id);
                                             }}
                                         />
                                         <button
-                                            onClick={() => handleAddSubCategory(cat.id)} // 追加処理を追加
+                                            onClick={() => setIconModalType("sub")}
+                                            className="p-2 bg-gray-50 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center border border-transparent focus:border-yellow-400 outline-none"
+                                        >
+                                            <DynamicIconDisplay iconName={newSubCategoryIcon} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleAddSubCategory(cat.id)}
                                             className="p-1 text-yellow-600 hover:bg-yellow-50 rounded"
                                         >
                                             <Plus size={18} />
@@ -279,6 +296,13 @@ export default function CategoryManager() {
                     value={newCategoryName}
                     onChange={(e) => setNewCategoryName(e.target.value)}
                 />
+                {/* アイコン選択ボタン */}
+                <button
+                    onClick={() => setIconModalType("parent")}
+                    className="p-2 bg-gray-50 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center border border-transparent focus:border-yellow-400 outline-none"
+                >
+                    <DynamicIconDisplay iconName={newCategoryIcon} />
+                </button>
                 <button
                     onClick={handleAddCategory}
                     className="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-xl transition-all shadow-lg shadow-yellow-200"
@@ -289,6 +313,48 @@ export default function CategoryManager() {
 
             {renderCategorySection("支出カテゴリ", "支出")}
             {renderCategorySection("収入カテゴリ", "収入")}
+
+            {iconModalType && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+                    onClick={() => setIconModalType(null)}
+                >
+                    <div
+                        className="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3 className="text-lg font-bold text-gray-800 mb-4">アイコンを選択</h3>
+                        <div className="grid grid-cols-5 gap-3">
+                            {Object.keys(ICON_MAP).map((iconKey) => {
+                                const IconCmp = ICON_MAP[iconKey as keyof typeof ICON_MAP];
+
+                                const isSelected = iconModalType === "parent"
+                                    ? newCategoryIcon === iconKey
+                                    : newSubCategoryIcon === iconKey;
+                                return (
+                                    <button
+                                        key={iconKey}
+                                        onClick={() => {
+                                            if (iconModalType === "parent") {
+                                                setNewCategoryIcon(iconKey);
+                                            } else {
+                                                setNewSubCategoryIcon(iconKey);
+                                            }
+                                            setIconModalType(null);
+                                        }}
+                                        className={`p-3 rounded-xl flex items-center justify-center transition-colors ${isSelected
+                                            ? 'bg-yellow-100 border-2 border-yellow-400'
+                                            : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                                            }`}
+                                    >
+                                        <IconCmp size={24} className={isSelected ? 'text-yellow-600' : 'text-gray-600'} />
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
