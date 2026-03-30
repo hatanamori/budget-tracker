@@ -83,11 +83,26 @@ export default function Page() {
     return cat ? cat.name : "-";
   };
 
+  const today = new Date();
+  const currentYearMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  const currentMonthExpense = transactions
+    .filter(t => t.date.startsWith(currentYearMonth) && t.amount < 0)
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
   return (
     <main className="p-10">
       <Toaster position="top-center" reverseOrder={false} />
 
       <h1 className="text-3xl font-bold mb-6">使用履歴</h1>
+
+      <div className="mb-8 p-6 bg-yellow-50 border-2 border-yellow-200 rounded-xl text-center shadow-sm max-w-md">
+        <h2 className="text-lg font-bold text-yellow-800 mb-2">
+          {today.getFullYear()}年{today.getMonth() + 1}月の総支出
+        </h2>
+        <p className="text-4xl font-black text-red-600 tracking-wider">
+          {currentMonthExpense.toLocaleString()}円
+        </p>
+      </div>
 
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border-4 border-yellow-900 bg-white text-left text-sm">
