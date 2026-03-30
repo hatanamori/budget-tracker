@@ -38,7 +38,7 @@ export default function Home() {
     const [transactionType, setTransactionType] = useState<"支出" | "収入">("支出");
     const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001";
 
     // 画面表示時に選択肢リストを取得
     useEffect(() => {

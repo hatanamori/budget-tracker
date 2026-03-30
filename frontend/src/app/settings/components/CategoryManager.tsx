@@ -39,7 +39,7 @@ export default function CategoryManager() {
     const [newSubCategoryName, setNewSubCategoryName] = useState("");
     const [newSubCategoryIcon, setNewSubCategoryIcon] = useState("Folder");
 
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001";
 
     // データ取得
     const fetchData = async () => {
