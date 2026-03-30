@@ -72,7 +72,6 @@ export default function Page() {
 
   // カテゴリ名を取得するヘルパー関数
   const getCategoryName = (subCategoryId: number) => {
-    console.log("渡されたID:", subCategoryId);
     // 1. まずサブカテゴリを探す
     const sub = subCategories.find(s => s.id === subCategoryId);
     if (!sub) return "-"; // サブカテゴリが見つからなければ終了
