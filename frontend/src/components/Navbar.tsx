@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, List, Target, Settings } from "lucide-react";
+import packageJson from "../../package.json";
 
 const NAV_ITEMS = [
   { name: "ホーム", href: "/", icon: Home },
@@ -19,7 +20,6 @@ export default function Navigation() {
       {/* PC用サイドバー */}
       <aside className="hidden md:flex flex-col w-64 bg-amber-200 h-screen fixed left-0 top-0 shadow-[4px_0px_0px_0px_rgba(0,0,0,0.1)] z-50">
         <div className="p-6">
-          {/* ★お気に入りのタイトルデザイン */}
           <div className="inline-block border-b-[8px] border-double border-amber-900 pb-2 mb-6">
             <h1 className="font-[family-name:var(--font-pixel)] text-3xl text-amber-500 drop-shadow-[2px_2px_0px_#713f12] tracking-wider leading-none">
               BUDGET<br />TRACKER
@@ -38,8 +38,8 @@ export default function Navigation() {
                   flex items-center gap-3 px-4 py-3 
                   font-[family-name:var(--font-pixel)] text-lg
                   border-4 transition-all duration-100
-                  ${isActive 
-                    ? "bg-amber-400 border-amber-900 text-amber-900 shadow-[4px_4px_0px_0px_#713f12] -translate-x-1 -translate-y-1" 
+                  ${isActive
+                    ? "bg-amber-400 border-amber-900 text-amber-900 shadow-[4px_4px_0px_0px_#713f12] -translate-x-1 -translate-y-1"
                     : "bg-amber-100 border-transparent text-amber-700 hover:border-amber-400 hover:text-amber-900"}
                 `}
               >
@@ -49,6 +49,12 @@ export default function Navigation() {
             );
           })}
         </nav>
+
+        <div className="p-4 mt-auto text-center">
+          <span className="font-[family-name:var(--font-pixel)] text-sm text-amber-700/60 tracking-widest">
+            v{packageJson.version}
+          </span>
+        </div>
       </aside>
 
       {/* スマホ用ボトムナビ */}
