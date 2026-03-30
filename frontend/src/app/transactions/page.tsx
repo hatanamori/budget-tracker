@@ -8,8 +8,8 @@ interface Transaction {
   date: string;
   amount: number;
   memo: string;
-  accountId: number;
-  subCategoryId: number;
+  account_id: number;
+  sub_category_id: number;
 }
 
 interface Account {
@@ -34,16 +34,16 @@ export default function Page() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";  
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [traRes, accRes, catRes, subRes] = await Promise.all([  
-          fetch(`${API_BASE_URL}/transactions/`),    
-          fetch(`${API_BASE_URL}/accounts/`),  
-          fetch(`${API_BASE_URL}/categories/`),  
-          fetch(`${API_BASE_URL}/sub-categories/`),  
+        const [traRes, accRes, catRes, subRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/transactions/`),
+          fetch(`${API_BASE_URL}/accounts/`),
+          fetch(`${API_BASE_URL}/categories/`),
+          fetch(`${API_BASE_URL}/sub-categories/`),
         ]);
 
         const [traData, accData, catData, subData] = await Promise.all([
@@ -60,10 +60,10 @@ export default function Page() {
 
       } catch (error) {
         console.error("データの取得に失敗しました", error);
-        toast.error("データの取得に失敗しました。"); 
+        toast.error("データの取得に失敗しました。");
       }
     };
-  fetchData();
+    fetchData();
   }, []);
 
   // ID から名前を取得するヘルパー関数
@@ -72,13 +72,14 @@ export default function Page() {
 
   // カテゴリ名を取得するヘルパー関数
   const getCategoryName = (subCategoryId: number) => {
+    console.log("渡されたID:", subCategoryId);
     // 1. まずサブカテゴリを探す
     const sub = subCategories.find(s => s.id === subCategoryId);
     if (!sub) return "-"; // サブカテゴリが見つからなければ終了
 
     // 2. そのサブカテゴリが持っている category_id を使ってカテゴリを探す
     const cat = categories.find(c => c.id === sub.category_id);
-    
+
     // 3. カテゴリが見つかれば名前を返す
     return cat ? cat.name : "-";
   };
@@ -95,7 +96,7 @@ export default function Page() {
             <tr>
               <th className="px-4 py-2 border border-yellow-900">日付</th>
               <th className="px-4 py-2 border border-yellow-900">カテゴリ</th>
-              <th className="px-4 py-2 border border-yellow-900">内容</th>
+              <th className="px-4 py-2 border border-yellow-900">詳細</th>
               <th className="px-4 py-2 border border-yellow-900">支払元</th>
               <th className="px-4 py-2 border border-yellow-900">金額</th>
               <th className="px-4 py-2 border border-yellow-900">メモ</th>
@@ -107,11 +108,11 @@ export default function Page() {
               <tr key={t.id} className="hover:bg-yellow-50">
                 <td className="px-4 py-2 border-r border-yellow-900">{t.date}</td>
 
-                <td className="px-4 py-2 border-r border-yellow-900">{getCategoryName(t.subCategoryId)}</td>
-                <td className="px-4 py-2 border-r border-yellow-900">{getSubCategoryName(t.subCategoryId)}</td>
-                <td className="px-4 py-2 border-r border-yellow-900">{getAccountName(t.accountId)}</td>
+                <td className="px-4 py-2 border-r border-yellow-900">{getCategoryName(t.sub_category_id)}</td>
+                <td className="px-4 py-2 border-r border-yellow-900">{getSubCategoryName(t.sub_category_id)}</td>
+                <td className="px-4 py-2 border-r border-yellow-900">{getAccountName(t.account_id)}</td>
 
-                <td className="px-4 py-2 border-r border-yellow-900 text-right">¥{t.amount.toLocaleString()}</td>
+                <td className="px-4 py-2 border-r border-yellow-900 text-right">{t.amount.toLocaleString()}</td>
                 <td className="px-4 py-2 text-gray-600">{t.memo}</td>
               </tr>
             )}
