@@ -4,7 +4,7 @@ services:
   db:
     image: postgres:14-alpine
     ports:
-      - "5432:5432"
+      - "5431:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -16,7 +16,7 @@ services:
   backend:
     build: ./backend
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
       - ./backend:/app
     environment:
@@ -26,7 +26,7 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       - ./frontend:/app
       - /app/node_modules
