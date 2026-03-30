@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import toast, { Toaster } from 'react-hot-toast';
 
 interface Transaction {
@@ -83,11 +83,15 @@ export default function Page() {
     return cat ? cat.name : "-";
   };
 
+  // 当月の総支出の計算
   const today = new Date();
   const currentYearMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-  const currentMonthExpense = transactions
-    .filter(t => t.date.startsWith(currentYearMonth) && t.amount < 0)
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+  const currentMonthExpense = useMemo(() => {
+    return transactions
+      .filter(t => t.date.startsWith(currentYearMonth) && t.amount < 0)
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  }, [transactions, currentYearMonth]);
 
   return (
     <main className="p-10">
