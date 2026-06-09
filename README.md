@@ -52,3 +52,7 @@ docker compose exec backend alembic upgrade head
 | Frontend | http://localhost:3001 |
 | Backend API | http://localhost:8001 |
 | API Docs (Swagger) | http://localhost:8001/docs |
+
+## 📸 スクリーンショット
+支出記録画面
+<img width="1246" height="829" alt="スクリーンショット 2026-06-09 9 54 15" src="https://github.com/user-attachments/assets/74dd70d6-0cfa-4bd2-97c8-5559e307c89b" />
