@@ -10,15 +10,10 @@ if [ ! -f .env.prod ]; then
     echo "❌ .env.prod ファイルが見つかりません。READMEに従って作成してください。"
     exit 1
 fi
-source .env.prod
 
 if $COMPOSE ps --format '{{.State}}' db | grep -q "running"; then
     echo "📦 バックアップ中..."
-    $COMPOSE exec -T db pg_dump -U "$POSTGRES_USER" --clean --if-exists "$POSTGRES_DB" > "$BACKUP_FILE"
-    echo "✅ バックアップ完了: $BACKUP_FILE"
-else
-    echo "⚠️ dbコンテナが起動していないため、バックアップをスキップします。"
-fi
+    $COMPOSE exec -T db sh -c 'pg_dump -U "$POSTGRES_USER" --clean --if-exists "$POSTGRES_DB"' > "$BACKUP_FILE"
 
 echo "🔄 最新コードを取得中..."
 git pull

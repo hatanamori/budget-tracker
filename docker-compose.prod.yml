@@ -3,8 +3,6 @@ version: "3.8"
 services:
   db:
     image: postgres:14-alpine
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -20,7 +18,6 @@ services:
     ports:
       - "8000:8000"
     environment:
-      WATCHFILES_FORCE_POLLING: true
       DATABASE_URL: ${DATABASE_URL}
   
   frontend:
@@ -31,8 +28,6 @@ services:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     ports:
       - "3000:3000"
-    environment:
-      WATCHPACK_POLLING: "true"
 
 volumes:
   postgres_data:
