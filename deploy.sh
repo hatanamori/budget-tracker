@@ -14,6 +14,7 @@ fi
 if $COMPOSE ps --format '{{.State}}' db | grep -q "running"; then
     echo "📦 バックアップ中..."
     $COMPOSE exec -T db sh -c 'pg_dump -U "$POSTGRES_USER" --clean --if-exists "$POSTGRES_DB"' > "$BACKUP_FILE"
+fi
 
 echo "🔄 最新コードを取得中..."
 git pull
