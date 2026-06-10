@@ -24,7 +24,7 @@ interface SubCategory {
 }
 
 export default function Home() {
-    const [amount, setAmount] = useState<number>(0);
+    const [amount, setAmount] = useState<number>("");
     const [memo, setMemo] = useState<string>("");
     const [selectedAccountId, setSelectedAccountId] = useState<string>("");
     const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
@@ -87,6 +87,11 @@ export default function Home() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
+        if (!selectedAccountId || !selectedSubCategoryId || amount === "") {
+            toast.error("すべての項目を選択してください");
+            return;
+        }
+
         if (!selectedAccountId || !selectedSubCategoryId) {
             toast.error("すべての項目を選択してください");
             return;
@@ -122,7 +127,7 @@ export default function Home() {
             );
 
             // 保存後にリセットして次を入力しやすいように
-            setAmount(0);
+            setAmount("");
             setMemo("");
             setSelectedCategoryId("");
             setSelectedSubCategoryId("");
@@ -147,7 +152,8 @@ export default function Home() {
                         <input
                             type="number"
                             value={amount}
-                            onChange={(e) => setAmount(Number(e.target.value))}
+                            onChange={(e) => setAmount(e.target.value === "" ? "" : Number(e.target.value))}
+                            onFocus={(e) => e.target.select()}
                             className="w-full pl-8 pr-4 py-3 text-3xl font-bold text-gray-800 border-b-2 border-gray-200 focus:border-blue-500 focus:outline-none transition-colors"
                             placeholder="0"
                         />
