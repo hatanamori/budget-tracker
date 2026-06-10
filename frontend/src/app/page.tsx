@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import toast, { Toaster } from 'react-hot-toast';
 import { WalletCards, Calendar, Utensils, TrainFront, Home as HomeIcon, ShoppingBag, Gamepad2, Coins, Tag } from 'lucide-react';
 import { ICON_MAP } from "./icons";
 
@@ -137,7 +136,6 @@ export default function Home() {
 
     return (
         <main className="p-10">
-
             <h1 className="text-3xl font-bold mb-6">💰 記録広場</h1>
 
             <form onSubmit={handleSubmit} className="bg-gray-50 p-6 rounded-lg shadow-md max-w-md space-y-6">
