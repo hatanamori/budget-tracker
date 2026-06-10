@@ -137,7 +137,6 @@ export default function Home() {
 
     return (
         <main className="p-10">
-            <Toaster position="top-center" reverseOrder={false} />
 
             <h1 className="text-3xl font-bold mb-6">💰 記録広場</h1>
 
