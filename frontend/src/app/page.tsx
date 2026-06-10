@@ -24,7 +24,7 @@ interface SubCategory {
 }
 
 export default function Home() {
-    const [amount, setAmount] = useState<number>("");
+    const [amount, setAmount] = useState<number | "">("");
     const [memo, setMemo] = useState<string>("");
     const [selectedAccountId, setSelectedAccountId] = useState<string>("");
     const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
@@ -88,11 +88,6 @@ export default function Home() {
         e.preventDefault();
 
         if (!selectedAccountId || !selectedSubCategoryId || amount === "") {
-            toast.error("すべての項目を選択してください");
-            return;
-        }
-
-        if (!selectedAccountId || !selectedSubCategoryId) {
             toast.error("すべての項目を選択してください");
             return;
         }
