@@ -37,21 +37,37 @@ budget-tracker/
 
 ### 起動手順
 
+#### 本番環境
+.env.sampleをコピーして.env.prodを作成してください
+```bash
+# 1. コンテナの起動
+./deploy.sh
+
+# 2. DBマイグレーション（初回・スキーマ変更時のみ）
+docker compose -f docker-compose.prod.yml exec backend alembic upgrade head
+```
+
+#### 開発環境
 ```bash
 # 1. コンテナの起動
 docker compose up --build
 
-# 2. DBマイグレーション
+# 2. DBマイグレーション（初回・スキーマ変更時のみ）
 docker compose exec backend alembic upgrade head
 ```
+
+> **同じデバイスで開発と本番を同時に動かす場合**  
+> `docker-compose.yml`のポート番号が競合するため、どちらかを変更してください。  
+> 例: 本番を`3000:3000` / `8000:8000`、開発を`3001:3000` / `8001:8000`
 
 ### アクセス先
 
 | サービス | URL |
 |---|---|
-| Frontend | http://localhost:3001 |
-| Backend API | http://localhost:8001 |
-| API Docs (Swagger) | http://localhost:8001/docs |
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8000 |
+| API Docs (Swagger) | http://localhost:8000/docs |
+> 同じデバイスで開発と本番を同時に動かす場合は、ポート番号を変更した番号に変更してください
 
 ## 📸 スクリーンショット
 支出記録画面
