@@ -39,6 +39,9 @@ type TypeFilter = "all" | "expense" | "income";
 
 // ヘルパー：金額表示
 function amountDisplay(amount: number) {
+  if (amount === 0) {
+    return <span className="font-mono font-bold tabular-nums text-gray-600">¥0</span>;
+  }
   const isInc = amount > 0;
   return (
     <span className={`font-mono font-bold tabular-nums ${isInc ? "text-blue-600" : "text-red-600"}`}>
@@ -49,8 +52,10 @@ function amountDisplay(amount: number) {
 
 // ヘルパー：日付を M/D 形式に
 function fmtDate(d: string) {
-  const [, m, day] = d.split("-");
-  return `${parseInt(m)}/${parseInt(day)}`;
+  const parts = d.split("-");
+  if (parts.length < 3) return d;
+  const [, m, day] = parts;
+  return `${parseInt(m, 10)}/${parseInt(day, 10)}`;
 }
 
 export default function Page() {
@@ -79,9 +84,17 @@ export default function Page() {
           fetch(`${API_BASE_URL}/accounts/`),
           fetch(`${API_BASE_URL}/categories/`),
         ]);
-        setTransactions(await traRes.json());
-        setAccounts(await accRes.json());
-        setCategories(await catRes.json());
+        if (!traRes.ok || !accRes.ok || !catRes.ok) {
+          throw new Error("データの取得に失敗しました。");
+        }
+        const [traData, accData, catData] = await Promise.all([
+          traRes.json(),
+          accRes.json(),
+          catRes.json(),
+        ]);
+        setTransactions(traData);
+        setAccounts(accData);
+        setCategories(catData);
       } catch {
         toast.error("データの取得に失敗しました。");
       }
