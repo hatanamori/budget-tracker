@@ -153,6 +153,17 @@ def read_accounts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
     return db.query(models.Account).offset(skip).limit(limit).all()
 
 
+@app.put("/accounts/{account_id}", response_model=schemas.Account)
+def update_account(account_id: int, update: schemas.AccountUpdate, db: Session = Depends(get_db)):
+    db_obj = db.query(models.Account).filter(models.Account.id == account_id).first()
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Account not found")
+    db_obj.name = update.name
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+
+
 @app.delete("/accounts/{account_id}")
 def delete_account(account_id: int, db: Session = Depends(get_db)):
     db_obj = db.query(models.Account).filter(models.Account.id == account_id).first()
@@ -182,6 +193,20 @@ def read_category(skip: int = 0, limit: int = Query(100, le=1000), db: Session =
     return db.query(models.Category).offset(skip).limit(limit).all()
 
 
+@app.put("/categories/{category_id}", response_model=schemas.Category)
+def update_category(category_id: int, update: schemas.CategoryUpdate, db: Session = Depends(get_db)):
+    db_obj = db.query(models.Category).filter(models.Category.id == category_id).first()
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Category not found")
+    if update.name is not None:
+        db_obj.name = update.name
+    if update.icon_name is not None:
+        db_obj.icon_name = update.icon_name
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+
+
 @app.delete("/categories/{category_id}")
 def delete_category(category_id: int, db: Session = Depends(get_db)):
     db_obj = db.query(models.Category).filter(models.Category.id == category_id).first()
@@ -209,6 +234,20 @@ def create_sub_category(sub_category: schemas.SubCategoryCreate, db: Session = D
 @app.get("/sub-categories/", response_model=List[schemas.SubCategory])
 def read_sub_category(skip: int = 0, limit: int = Query(100, le=1000), db: Session = Depends(get_db)):
     return db.query(models.SubCategory).offset(skip).limit(limit).all()
+
+
+@app.put("/sub-categories/{sub_category_id}", response_model=schemas.SubCategory)
+def update_sub_category(sub_category_id: int, update: schemas.SubCategoryUpdate, db: Session = Depends(get_db)):
+    db_obj = db.query(models.SubCategory).filter(models.SubCategory.id == sub_category_id).first()
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="SubCategory not found")
+    if update.name is not None:
+        db_obj.name = update.name
+    if update.icon_name is not None:
+        db_obj.icon_name = update.icon_name
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
 
 
 @app.delete("/sub-categories/{sub_category_id}")
