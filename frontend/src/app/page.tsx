@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { WalletCards, Calendar, Utensils, TrainFront, Home as HomeIcon, ShoppingBag, Gamepad2, Coins, Tag } from 'lucide-react';
 import { ICON_MAP } from "./icons";
+import BudgetDashboard from "./components/BudgetDashboard";
+import toast from "react-hot-toast";
 
 interface Account {
     id: number;
@@ -36,6 +38,7 @@ export default function Home() {
 
     const [transactionType, setTransactionType] = useState<"支出" | "収入">("支出");
     const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
+    const [budgetRefreshKey, setBudgetRefreshKey] = useState(0);
 
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -127,6 +130,7 @@ export default function Home() {
             setSelectedCategoryId("");
             setSelectedSubCategoryId("");
             setDate(new Date().toISOString().split('T')[0]);
+            setBudgetRefreshKey((k) => k + 1);
 
         } catch (error) {
             console.error("エラー:", error);
@@ -136,9 +140,23 @@ export default function Home() {
 
     return (
         <main className="p-10">
-            <h1 className="text-3xl font-bold mb-6">💰 記録広場</h1>
+            <div className="mb-6">
+                <div className="flex items-center gap-1.5 mb-2">
+                    {["bg-yellow-500", "bg-yellow-300", "bg-yellow-500", "bg-yellow-300", "bg-yellow-500"].map((c, i) => (
+                        <div key={i} className={`w-2.5 h-2.5 ${c}`} />
+                    ))}
+                </div>
+                <h1 className="font-mono text-3xl font-black tracking-tight text-gray-800 leading-none">
+                    家計ログ
+                </h1>
+                <p className="font-mono text-xs tracking-[0.25em] text-gray-400 uppercase mt-1.5">
+                    HOUSEHOLD · RECORD
+                </p>
+            </div>
 
-            <form onSubmit={handleSubmit} className="bg-gray-50 p-6 rounded-lg shadow-md max-w-md space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+
+            <form onSubmit={handleSubmit} className="bg-gray-50 p-6 rounded-lg shadow-md space-y-6">
                 {/* 金額入力 */}
                 <div>
                     <label className="block text-xs font-bold text-gray-400 mb-1 uppercase">Amount</label>
@@ -287,6 +305,13 @@ export default function Home() {
                     保存
                 </button>
             </form>
+
+            {/* 予算ダッシュボード（デスクトップ: 右側、スマホ: 下） */}
+            <div className="w-full">
+                <BudgetDashboard refreshKey={budgetRefreshKey} />
+            </div>
+
+            </div>
         </main>
     );
 }

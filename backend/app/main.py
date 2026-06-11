@@ -331,6 +331,50 @@ def delete_recurring_transaction(rt_id: int, db: Session = Depends(get_db)):
 
 
 # ---------------------------------------------
+# 予算
+# ---------------------------------------------
+
+
+@app.get("/budgets/", response_model=List[schemas.CategoryBudget])
+def read_budgets(db: Session = Depends(get_db)):
+    return db.query(models.CategoryBudget).all()
+
+
+@app.put("/budgets/{category_id}", response_model=schemas.CategoryBudget)
+def upsert_budget(
+    category_id: int, update: schemas.CategoryBudgetUpdate, db: Session = Depends(get_db)
+):
+    category = db.query(models.Category).filter(models.Category.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    existing = db.query(models.CategoryBudget).filter(
+        models.CategoryBudget.category_id == category_id
+    ).first()
+    if existing:
+        existing.amount = update.amount
+        db.commit()
+        db.refresh(existing)
+        return existing
+    new_budget = models.CategoryBudget(category_id=category_id, amount=update.amount)
+    db.add(new_budget)
+    db.commit()
+    db.refresh(new_budget)
+    return new_budget
+
+
+@app.delete("/budgets/{category_id}")
+def delete_budget(category_id: int, db: Session = Depends(get_db)):
+    existing = db.query(models.CategoryBudget).filter(
+        models.CategoryBudget.category_id == category_id
+    ).first()
+    if not existing:
+        raise HTTPException(status_code=404, detail="Budget not found")
+    db.delete(existing)
+    db.commit()
+    return {"message": "Budget deleted successfully"}
+
+
+# ---------------------------------------------
 
 
 @app.get("/")

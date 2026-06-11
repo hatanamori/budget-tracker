@@ -99,3 +99,13 @@ class RecurringTransaction(Base):
 
     account = relationship("Account")
     sub_category = relationship("SubCategory")
+
+
+class CategoryBudget(Base):
+    __tablename__ = "category_budgets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    category_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE"), unique=True, nullable=False)
+    amount = Column(Integer, nullable=False)  # 月間予算（正の値）
+
+    category = relationship("Category")
