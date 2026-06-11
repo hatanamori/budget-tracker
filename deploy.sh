@@ -30,4 +30,10 @@ if [ $BUILD_RESULT -ne 0 ]; then
     exit 1
 fi
 
+echo "⏳ DBの起動を待機中..."
+sleep 5
+
+echo "🗄️ DBマイグレーション実行中..."
+$COMPOSE exec -T backend alembic upgrade head
+
 echo "🚀 デプロイ完了！"
