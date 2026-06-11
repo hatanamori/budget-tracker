@@ -155,3 +155,24 @@ class RecurringTransaction(RecurringTransactionBase):
     last_applied_date: Optional[date] = None
     account: Optional[Account] = None
     sub_category: Optional[SubCategory] = None
+
+
+# ----- CategoryBudget のスキーマ -----
+
+
+class CategoryBudgetBase(BaseSchema):
+    category_id: int
+    amount: int
+
+
+class CategoryBudgetCreate(CategoryBudgetBase):
+    pass
+
+
+class CategoryBudgetUpdate(BaseSchema):
+    amount: int
+
+
+class CategoryBudget(CategoryBudgetBase):
+    id: int
+    category: Optional[Category] = None

@@ -1,19 +1,24 @@
 "use client"
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import AccountManager from "./AccountManager";
 import CategoryManager from "./CategoryManager";
 import RecurringManager from "./RecurringManager";
+import BudgetManager from "./BudgetManager";
 
-type Tab = 'categories' | 'accounts' | 'recurring';
+type Tab = 'categories' | 'accounts' | 'recurring' | 'budget';
 
 export default function page() {
-    const [activeTab, setActiveTab] = useState<Tab>('categories')
+    const searchParams = useSearchParams();
+    const initialTab = (searchParams.get("tab") as Tab) ?? "categories";
+    const [activeTab, setActiveTab] = useState<Tab>(initialTab);
 
     const tabs: { key: Tab; label: string }[] = [
         { key: 'categories', label: 'カテゴリ' },
         { key: 'accounts', label: '支払い方法' },
         { key: 'recurring', label: '固定費' },
+        { key: 'budget', label: '予算' },
     ];
 
     return (
@@ -41,6 +46,7 @@ export default function page() {
                 {activeTab === 'categories' && <CategoryManager />}
                 {activeTab === 'accounts' && <AccountManager />}
                 {activeTab === 'recurring' && <RecurringManager />}
+                {activeTab === 'budget' && <BudgetManager />}
             </div>
         </main>
     )
