@@ -91,9 +91,13 @@ export default function RecurringManager() {
       return;
     }
 
+    const selectedSub = allSubCategories.find((s) => s.id === Number(form.sub_category_id));
+    const selectedCat = categories.find((c) => c.id === selectedSub?.category_id);
+    const isExpense = selectedCat ? selectedCat.type === "支出" : true;
+
     const body: Record<string, unknown> = {
       name: form.name,
-      amount: -Math.abs(Number(form.amount)),
+      amount: isExpense ? -Math.abs(Number(form.amount)) : Math.abs(Number(form.amount)),
       memo: form.memo || null,
       frequency: form.frequency,
       day_of_month: Number(form.day_of_month),
@@ -329,8 +333,8 @@ export default function RecurringManager() {
                 className={`hover:bg-yellow-50 ${!item.is_active ? "opacity-40" : ""}`}
               >
                 <td className="px-4 py-3 font-medium text-gray-800">{item.name}</td>
-                <td className="px-4 py-3 text-right text-red-600 font-mono">
-                  ¥{Math.abs(item.amount).toLocaleString()}
+                <td className={`px-4 py-3 text-right font-mono ${item.amount < 0 ? "text-red-600" : "text-green-600"}`}>
+                  {item.amount < 0 ? "-" : "+"}¥{Math.abs(item.amount).toLocaleString()}
                 </td>
                 <td className="px-4 py-3 text-gray-600">{frequencyLabel(item)}</td>
                 <td className="px-4 py-3 text-gray-600">{subCategoryName(item)}</td>

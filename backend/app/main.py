@@ -31,36 +31,48 @@ def apply_recurring_transactions(db: Session) -> int:
 
     created = 0
     for rt in actives:
-        if rt.end_date and today > rt.end_date:
-            continue
-
-        should_apply = False
+        target_date = None
 
         if rt.frequency == "monthly":
             eff_day = _effective_day(today.year, today.month, rt.day_of_month)
-            if today.day == eff_day:
-                first_of_month = date(today.year, today.month, 1)
-                if rt.last_applied_date is None or rt.last_applied_date < first_of_month:
-                    should_apply = True
+            if today.day >= eff_day:
+                target_date = date(today.year, today.month, eff_day)
+            else:
+                prev_year = today.year if today.month > 1 else today.year - 1
+                prev_month = today.month - 1 if today.month > 1 else 12
+                eff_day_prev = _effective_day(prev_year, prev_month, rt.day_of_month)
+                target_date = date(prev_year, prev_month, eff_day_prev)
 
         elif rt.frequency == "yearly":
             if rt.month_of_year is None:
                 continue
             eff_day = _effective_day(today.year, rt.month_of_year, rt.day_of_month)
-            if today.day == eff_day and today.month == rt.month_of_year:
-                if rt.last_applied_date is None or rt.last_applied_date.year < today.year:
-                    should_apply = True
+            if today.month > rt.month_of_year or (
+                today.month == rt.month_of_year and today.day >= eff_day
+            ):
+                target_date = date(today.year, rt.month_of_year, eff_day)
+            else:
+                eff_day_prev = _effective_day(today.year - 1, rt.month_of_year, rt.day_of_month)
+                target_date = date(today.year - 1, rt.month_of_year, eff_day_prev)
 
-        if should_apply:
-            db.add(models.Transaction(
-                date=today,
-                amount=rt.amount,
-                memo=rt.memo,
-                account_id=rt.account_id,
-                sub_category_id=rt.sub_category_id,
-            ))
-            rt.last_applied_date = today
-            created += 1
+        if target_date is None:
+            continue
+        if target_date < rt.start_date:
+            continue
+        if rt.end_date and target_date > rt.end_date:
+            continue
+        if rt.last_applied_date is not None and rt.last_applied_date >= target_date:
+            continue
+
+        db.add(models.Transaction(
+            date=target_date,
+            amount=rt.amount,
+            memo=rt.memo,
+            account_id=rt.account_id,
+            sub_category_id=rt.sub_category_id,
+        ))
+        rt.last_applied_date = target_date
+        created += 1
 
     if created > 0:
         db.commit()
@@ -73,6 +85,9 @@ def _scheduled_job():
     db = database.SessionLocal()
     try:
         apply_recurring_transactions(db)
+    except Exception as e:
+        db.rollback()
+        logger.exception("固定費の自動登録中にエラーが発生しました: %s", e)
     finally:
         db.close()
 
