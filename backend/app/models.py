@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean
 from sqlalchemy.orm import relationship, declarative_base
+import calendar
 
 Base = declarative_base()
 
@@ -76,3 +77,25 @@ class Transaction(Base):
     account = relationship("Account", back_populates="transactions")
     sub_category = relationship("SubCategory", back_populates="transactions")
     goal = relationship("Goal", back_populates="transactions")
+
+
+class RecurringTransaction(Base):
+    __tablename__ = "recurring_transactions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    amount = Column(Integer, nullable=False)
+    memo = Column(String, nullable=True)
+    frequency = Column(String(50), nullable=False)  # "monthly" or "yearly"
+    day_of_month = Column(Integer, nullable=False)   # 1-31
+    month_of_year = Column(Integer, nullable=True)   # 1-12、yearlyのみ使用
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=True)
+    last_applied_date = Column(Date, nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+
+    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
+    sub_category_id = Column(Integer, ForeignKey("sub_categories.id"), nullable=False)
+
+    account = relationship("Account")
+    sub_category = relationship("SubCategory")

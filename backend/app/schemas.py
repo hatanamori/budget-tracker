@@ -107,3 +107,51 @@ class Transaction(TransactionBase):
     # 紐づく名前データも一緒に返す
     account: Optional[Account] = None
     # sub_category: Optional[SubCategory] = None
+
+
+# ----- RecurringTransaction のスキーマ -----
+
+
+class RecurringTransactionBase(BaseSchema):
+    name: str
+    amount: int
+    memo: Optional[str] = None
+    frequency: str  # "monthly" or "yearly"
+    day_of_month: int
+    month_of_year: Optional[int] = None
+    start_date: date
+    end_date: Optional[date] = None
+    account_id: int
+    sub_category_id: int
+    is_active: bool = True
+
+# 入力用
+
+
+class RecurringTransactionCreate(RecurringTransactionBase):
+    pass
+
+# 更新用
+
+
+class RecurringTransactionUpdate(BaseSchema):
+    name: Optional[str] = None
+    amount: Optional[int] = None
+    memo: Optional[str] = None
+    frequency: Optional[str] = None
+    day_of_month: Optional[int] = None
+    month_of_year: Optional[int] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    account_id: Optional[int] = None
+    sub_category_id: Optional[int] = None
+    is_active: Optional[bool] = None
+
+# 出力用
+
+
+class RecurringTransaction(RecurringTransactionBase):
+    id: int
+    last_applied_date: Optional[date] = None
+    account: Optional[Account] = None
+    sub_category: Optional[SubCategory] = None
