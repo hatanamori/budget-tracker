@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import date
 from typing import List, Optional
 
@@ -27,7 +27,7 @@ class Account(AccountBase):
 
 
 class AccountUpdate(BaseSchema):
-    name: str
+    name: str = Field(..., min_length=1)
 
 # ----- SubCategory のスキーマ -----
 
@@ -51,7 +51,7 @@ class SubCategory(SubCategoryBase):
 
 
 class SubCategoryUpdate(BaseSchema):
-    name: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=1)
     icon_name: Optional[str] = None
 
 
@@ -74,7 +74,7 @@ class Category(CategoryBase):
 
 
 class CategoryUpdate(BaseSchema):
-    name: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=1)
     icon_name: Optional[str] = None
 
 

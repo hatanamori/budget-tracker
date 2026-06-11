@@ -51,7 +51,7 @@ export default function CategoryManager() {
             if (!res.ok) throw new Error();
             const data: Category[] = await res.json();
             setCategories(
-                data.sort((a, b) => (a.type === "支出" && b.type === "収入" ? -1 : 1))
+                data.sort((a, b) => (a.type === b.type ? 0 : a.type === "支出" ? -1 : 1))
             );
         } catch {
             toast.error("データの取得に失敗しました。");
@@ -71,16 +71,18 @@ export default function CategoryManager() {
     // ----- 追加 -----
     const handleAddCategory = async () => {
         if (!newCategoryName.trim()) return;
-        await toast.promise(
-            fetch(`${API_BASE_URL}/categories/`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: newCategoryName, type: newCategoryType, icon_name: newCategoryIcon }),
-            }).then((r) => { if (!r.ok) throw new Error(); }),
-            { loading: "保存中...", success: "追加しました", error: "保存に失敗しました。" }
-        );
-        setNewCategoryName("");
-        fetchData();
+        try {
+            await toast.promise(
+                fetch(`${API_BASE_URL}/categories/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: newCategoryName, type: newCategoryType, icon_name: newCategoryIcon }),
+                }).then((r) => { if (!r.ok) throw new Error(); }),
+                { loading: "保存中...", success: "追加しました", error: "保存に失敗しました。" }
+            );
+            setNewCategoryName("");
+            fetchData();
+        } catch { /* toast.promise がエラー表示を担う */ }
     };
 
     const handleAddSubCategory = async (parentId: number) => {

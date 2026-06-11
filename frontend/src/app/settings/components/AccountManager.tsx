@@ -31,16 +31,18 @@ export default function AccountManager() {
 
     const handleAdd = async () => {
         if (!newAccountName.trim()) return;
-        await toast.promise(
-            fetch(`${API_BASE_URL}/accounts/`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: newAccountName }),
-            }).then((r) => { if (!r.ok) throw new Error(); }),
-            { loading: "保存中...", success: "追加しました", error: "保存に失敗しました。" }
-        );
-        setNewAccountName("");
-        fetchData();
+        try {
+            await toast.promise(
+                fetch(`${API_BASE_URL}/accounts/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: newAccountName }),
+                }).then((r) => { if (!r.ok) throw new Error(); }),
+                { loading: "保存中...", success: "追加しました", error: "保存に失敗しました。" }
+            );
+            setNewAccountName("");
+            fetchData();
+        } catch { /* toast.promise がエラー表示を担う */ }
     };
 
     const startEdit = (account: Account) => {
