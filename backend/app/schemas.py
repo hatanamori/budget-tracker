@@ -25,6 +25,10 @@ class AccountCreate(AccountBase):
 class Account(AccountBase):
     id: int
 
+
+class AccountUpdate(BaseSchema):
+    name: str
+
 # ----- SubCategory のスキーマ -----
 
 
@@ -46,6 +50,11 @@ class SubCategory(SubCategoryBase):
         from_attributes = True
 
 
+class SubCategoryUpdate(BaseSchema):
+    name: Optional[str] = None
+    icon_name: Optional[str] = None
+
+
 # ----- Category のスキーマ -----
 
 
@@ -62,6 +71,11 @@ class CategoryCreate(CategoryBase):
 class Category(CategoryBase):
     id: int
     sub_categories: List[SubCategory] = []
+
+
+class CategoryUpdate(BaseSchema):
+    name: Optional[str] = None
+    icon_name: Optional[str] = None
 
 
 # ----- Goal のスキーマ -----
