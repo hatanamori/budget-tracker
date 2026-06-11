@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { Trash2 } from "lucide-react";
 
 interface Category {
@@ -48,8 +48,8 @@ export default function BudgetManager() {
 
   const handleSave = async (categoryId: number) => {
     const val = inputs[categoryId];
-    const amount = parseInt(val, 10);
-    if (!val || isNaN(amount) || amount <= 0) {
+    const amount = Number(val);
+    if (!val || isNaN(amount) || amount <= 0 || !Number.isInteger(amount)) {
       toast.error("正しい金額を入力してください");
       return;
     }
@@ -91,7 +91,6 @@ export default function BudgetManager() {
 
   return (
     <div>
-      <Toaster position="top-center" />
 
       {/* 合計予算 */}
       <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl p-6 mb-6 text-center shadow-sm">

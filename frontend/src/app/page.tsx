@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { WalletCards, Calendar, Utensils, TrainFront, Home as HomeIcon, ShoppingBag, Gamepad2, Coins, Tag } from 'lucide-react';
 import { ICON_MAP } from "./icons";
 import BudgetDashboard from "./components/BudgetDashboard";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 interface Account {
     id: number;
@@ -140,7 +140,6 @@ export default function Home() {
 
     return (
         <main className="p-10">
-            <Toaster position="top-center" />
             <div className="mb-6">
                 <div className="flex items-center gap-1.5 mb-2">
                     {["bg-yellow-500", "bg-yellow-300", "bg-yellow-500", "bg-yellow-300", "bg-yellow-500"].map((c, i) => (

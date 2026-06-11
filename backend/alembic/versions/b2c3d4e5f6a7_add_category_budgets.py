@@ -20,7 +20,7 @@ def upgrade():
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('category_id', sa.Integer(), nullable=False),
         sa.Column('amount', sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(['category_id'], ['categories.id']),
+        sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('category_id'),
     )

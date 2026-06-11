@@ -95,7 +95,7 @@ export default function BudgetDashboard({ refreshKey = 0 }: { refreshKey?: numbe
       .sort((a, b) => b.pct - a.pct); // 消化率が高い順
   }, [budgets, categories, expenseByCategory]);
 
-  const totalBudget = budgets.reduce((s, b) => s + b.amount, 0);
+  const totalBudget = budgetRows.reduce((s, r) => s + r.budget, 0);
   const totalUsed = budgetRows.reduce((s, r) => s + r.used, 0);
   const totalPct = totalBudget > 0 ? (totalUsed / totalBudget) * 100 : 0;
   const totalRemaining = totalBudget - totalUsed;
@@ -113,7 +113,7 @@ export default function BudgetDashboard({ refreshKey = 0 }: { refreshKey?: numbe
     return "bg-yellow-100";
   };
 
-  if (budgets.length === 0) {
+  if (budgetRows.length === 0) {
     return (
       <div className="bg-white border border-yellow-200 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 text-center shadow-sm">
         <div className="w-14 h-14 rounded-full bg-yellow-50 flex items-center justify-center">

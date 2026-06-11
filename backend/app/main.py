@@ -344,6 +344,9 @@ def read_budgets(db: Session = Depends(get_db)):
 def upsert_budget(
     category_id: int, update: schemas.CategoryBudgetUpdate, db: Session = Depends(get_db)
 ):
+    category = db.query(models.Category).filter(models.Category.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
     existing = db.query(models.CategoryBudget).filter(
         models.CategoryBudget.category_id == category_id
     ).first()
