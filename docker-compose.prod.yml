@@ -17,7 +17,7 @@ services:
       dockerfile: Dockerfile.prod
     restart: always
     ports:
-      - "8000:8000"
+      - "${PROD_BACK_PORT}:8000"
     environment:
       DATABASE_URL: ${DATABASE_URL}
   
@@ -29,7 +29,7 @@ services:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     restart: always
     ports:
-      - "3000:3000"
+      - "${PROD_FRONT_PORT}:3000"
 
 volumes:
   postgres_data:

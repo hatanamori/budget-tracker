@@ -57,8 +57,7 @@ docker compose exec backend alembic upgrade head
 ```
 
 > **同じデバイスで開発と本番を同時に動かす場合**  
-> `docker-compose.yml`のポート番号が競合するため、どちらかを変更してください。  
-> 例: 本番を`3000:3000` / `8000:8000`、開発を`3001:3000` / `8001:8000`
+> `docker-compose.yml`のポート番号が競合するため、`.env`から変更してください。  
 
 ### アクセス先
 
